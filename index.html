@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChewsToLose - Mindful Eating & Weight Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            50: '#f4f7f4',
+                            100: '#e3ebe3',
+                            200: '#c7d7c7',
+                            500: '#52796f',
+                            600: '#354f52',
+                            700: '#2f3e46',
+                            800: '#1e292b'
+                        },
+                        emeraldCustom: '#2a9d8f',
+                        warmWhite: '#faf9f6',
+                        cream: '#f3efe6',
+                        coral: {
+                            400: '#ff7b54',
+                            500: '#e76f51',
+                            600: '#d05436'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf9f6;
+            color: #2f3e46;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f7f4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c7d7c7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #52796f;
+        }
+
+        /* Pulse ring animation for timer */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .animate-pulse-ring {
+            animation: pulse-ring 3s infinite ease-in-out;
+        }
+
+        /* Page view transition styles */
+        .page-view {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.25s ease-in-out;
+        }
+        .page-view.active {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-warmWhite text-sage-700 antialiased selection:bg-sage-200 selection:text-sage-800">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 bg-warmWhite/90 backdrop-blur-md border-b border-sage-100 shadow-sm transition-all duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Brand Logo -->
+                <a href="#home" onclick="navigateTo('home')" class="flex items-center gap-2 group cursor-pointer">
+                    <div class="w-10 h-10 rounded-xl bg-sage-500 flex items-center justify-center text-white shadow-md group-hover:bg-sage-600 transition-colors">
+                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xl font-bold tracking-tight text-sage-700 group-hover:text-sage-600 transition-colors">ChewsToLose<span class="text-coral-500">.com</span></span>
+                        <span class="text-[10px] uppercase tracking-wider font-semibold text-sage-500 -mt-1">Mindful Weight Management</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                    <button onclick="navigateTo('home')" id="nav-home" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center gap-1.5 text-sage-500 hover:text-sage-700 hover:bg-sage-50">
+                        <i data-lucide="home" class="w-4 h-4"></i> Home
+                    </button>
+                    <button onclick="navigateTo('timer')" id="nav-timer" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center gap-1.5 text-sage-500 hover:text-sage-700 hover:bg-sage-50">
+                        <i data-lucide="timer" class="w-4 h-4"></i> Bite Pace Tool
+                    </button>
+                    <button onclick="navigateTo('programs')" id="nav-programs" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center gap-1.5 text-sage-500 hover:text-sage-700 hover:bg-sage-50">
+                        <i data-lucide="shopping-bag" class="w-4 h-4"></i> Programs & Store
+                    </button>
+                    <button onclick="navigateTo('about')" id="nav-about" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center gap-1.5 text-sage-500 hover:text-sage-700 hover:bg-sage-50">
+                        <i data-lucide="brain-circuit" class="w-4 h-4"></i> Science & About
+                    </button>
+                    <button onclick="navigateTo('blog')" id="nav-blog" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center gap-1.5 text-sage-500 hover:text-sage-700 hover:bg-sage-50">
+                        <i data-lucide="book-open" class="w-4 h-4"></i> Articles & Tips
+                    </button>
+                    <button onclick="navigateTo('contact')" id="nav-contact" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center gap-1.5 text-sage-500 hover:text-sage-700 hover:bg-sage-50">
+                        <i data-lucide="users" class="w-4 h-4"></i> Community
+                    </button>
+                </nav>
+
+                <!-- Header CTA Button -->
+                <div class="hidden sm:flex items-center gap-3">
+                    <button onclick="navigateTo('timer')" class="bg-coral-500 hover:bg-coral-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> Start Pace Timer
+                    </button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="flex md:hidden items-center">
+                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="text-sage-600 hover:text-sage-700 focus:outline-none p-2 rounded-lg hover:bg-sage-100" aria-label="Toggle Navigation">
+                        <i data-lucide="menu" id="menu-icon-open" class="w-6 h-6"></i>
+                        <i data-lucide="x" id="menu-icon-close" class="w-6 h-6 hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-b border-sage-100 bg-warmWhite px-4 pt-2 pb-4 space-y-1 shadow-lg">
+            <button onclick="navigateTo('home'); toggleMobileMenu();" class="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-sage-600 hover:bg-sage-50 flex items-center gap-3">
+                <i data-lucide="home" class="w-5 h-5 text-sage-500"></i> Home
+            </button>
+            <button onclick="navigateTo('timer'); toggleMobileMenu();" class="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-sage-600 hover:bg-sage-50 flex items-center gap-3">
+                <i data-lucide="timer" class="w-5 h-5 text-sage-500"></i> Bite Pace Tool & Tracker
+            </button>
+            <button onclick="navigateTo('programs'); toggleMobileMenu();" class="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-sage-600 hover:bg-sage-50 flex items-center gap-3">
+                <i data-lucide="shopping-bag" class="w-5 h-5 text-sage-500"></i> Programs & Kits
+            </button>
+            <button onclick="navigateTo('about'); toggleMobileMenu();" class="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-sage-600 hover:bg-sage-50 flex items-center gap-3">
+                <i data-lucide="brain-circuit" class="w-5 h-5 text-sage-500"></i> The Science & Mission
+            </button>
+            <button onclick="navigateTo('blog'); toggleMobileMenu();" class="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-sage-600 hover:bg-sage-50 flex items-center gap-3">
+                <i data-lucide="book-open" class="w-5 h-5 text-sage-500"></i> Blog & Mindful Tips
+            </button>
+            <button onclick="navigateTo('contact'); toggleMobileMenu();" class="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-sage-600 hover:bg-sage-50 flex items-center gap-3">
+                <i data-lucide="users" class="w-5 h-5 text-sage-500"></i> Contact & Community
+            </button>
+            <div class="pt-2">
+                <button onclick="navigateTo('timer'); toggleMobileMenu();" class="w-full bg-coral-500 hover:bg-coral-600 text-white px-4 py-3 rounded-xl font-medium text-center shadow flex items-center justify-center gap-2">
+                    <i data-lucide="play" class="w-4 h-4 fill-current"></i> Launch Bite Pace Timer
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Dynamic Container -->
+    <main class="flex-grow">
+        
+        <!-- ==================== 1. HOME PAGE ==================== -->
+        <div id="page-home" class="page-view active">
+            <!-- Hero Section -->
+            <section class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 bg-gradient-to-b from-warmWhite via-sage-50/50 to-warmWhite">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="grid lg:grid-cols-12 gap-12 items-center">
+                        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sage-100 border border-sage-200 text-sage-600 text-xs font-semibold uppercase tracking-wider">
+                                <i data-lucide="heart-pulse" class="w-4 h-4 text-coral-500"></i>
+                                Science-Backed Mindful Weight Loss
+                            </div>
+                            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-sage-700 leading-tight tracking-tight">
+                                Chew Your Way To A <span class="text-sage-500 underline decoration-coral-400 decoration-wavy underline-offset-8">Healthier You</span>
+                            </h1>
+                            <p class="text-lg sm:text-xl text-sage-600 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                                Transform your relationship with food through mastication control and satiety awareness. No restrictive starvation diets—just smarter, slower, and effortless calorie reduction.
+                            </p>
+                            <div class="pt-4 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                                <button onclick="navigateTo('timer')" class="w-full sm:w-auto bg-sage-500 hover:bg-sage-600 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3 text-lg">
+                                    <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                                    Try Interactive Timer
+                                </button>
+                                <button onclick="scrollToElement('calculator-section')" class="w-full sm:w-auto bg-white border-2 border-sage-200 text-sage-700 hover:bg-sage-50 hover:border-sage-300 px-8 py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-lg shadow-sm">
+                                    <i data-lucide="calculator" class="w-5 h-5 text-sage-500"></i>
+                                    Calculate Your Pace Impact
+                                </button>
+                            </div>
+                            <div class="pt-6 flex items-center justify-center lg:justify-start gap-8 text-xs font-medium text-sage-500">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="check-circle" class="w-4 h-4 text-emeraldCustom"></i> 20+ Chews/Bite Protocol
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="check-circle" class="w-4 h-4 text-emeraldCustom"></i> Natural Leptin Boost
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="check-circle" class="w-4 h-4 text-emeraldCustom"></i> 100% Non-Invasive
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hero Graphic / Dynamic Card -->
+                        <div class="lg:col-span-5 flex justify-center">
+                            <div class="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-sage-100">
+                                <div class="absolute -top-4 -right-4 bg-coral-500 text-white font-bold text-xs px-4 py-2 rounded-full shadow-md uppercase tracking-wider flex items-center gap-1">
+                                    <i data-lucide="zap" class="w-3.5 h-3.5"></i> Proven Method
+                                </div>
+                                <div class="text-center space-y-4">
+                                    <div class="w-20 h-20 bg-sage-100 rounded-2xl flex items-center justify-center mx-auto text-sage-500 shadow-inner">
+                                        <i data-lucide="utensils" class="w-10 h-10"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-sage-700">The 20-Minute Meal Rule</h3>
+                                    <p class="text-sm text-sage-600 leading-relaxed">
+                                        It takes approximately 20 minutes for your stomach to communicate satiety signals to your brain. Fast eating causes 30-50% excess calorie intake before fullness is felt.
+                                    </p>
+                                    <div class="p-4 bg-sage-50 rounded-2xl border border-sage-100 space-y-3">
+                                        <div class="flex justify-between text-xs font-semibold text-sage-600">
+                                            <span>Rushed Eating (5-8 min)</span>
+                                            <span class="text-coral-500">+450 Unneeded Calories</span>
+                                        </div>
+                                        <div class="w-full bg-sage-200 h-2.5 rounded-full overflow-hidden">
+                                            <div class="bg-coral-500 h-full w-4/5 rounded-full"></div>
+                                        </div>
+                                        <div class="flex justify-between text-xs font-semibold text-sage-600 pt-1">
+                                            <span>Mindful Chewing (20+ min)</span>
+                                            <span class="text-sage-500">Optimal Fullness Signal</span>
+                                        </div>
+                                        <div class="w-full bg-sage-200 h-2.5 rounded-full overflow-hidden">
+                                            <div class="bg-emeraldCustom h-full w-2/5 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4 Core Pillars Section -->
+            <section class="py-16 bg-white border-y border-sage-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-3xl mx-auto mb-12">
+                        <h2 class="text-3xl font-bold text-sage-700">Four Pillars of ChewsToLose</h2>
+                        <p class="text-sage-600 mt-2">Why slowing down your mastication speed alters gut biome hormones, digestion, and total daily calorie balance.</p>
+                    </div>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div class="bg-warmWhite p-6 rounded-2xl border border-sage-100 hover:shadow-lg transition-all group">
+                            <div class="w-12 h-12 bg-sage-100 text-sage-500 rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage-500 group-hover:text-white transition-colors">
+                                <i data-lucide="clock" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-sage-700 mb-2">1. Slow Eating Benefits</h3>
+                            <p class="text-sm text-sage-600 leading-relaxed">
+                                Thorough chewing reduces digestive stress on the stomach, enhances nutrient absorption, and eliminates post-meal bloating.
+                            </p>
+                        </div>
+                        <div class="bg-warmWhite p-6 rounded-2xl border border-sage-100 hover:shadow-lg transition-all group">
+                            <div class="w-12 h-12 bg-sage-100 text-sage-500 rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage-500 group-hover:text-white transition-colors">
+                                <i data-lucide="brain" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-sage-700 mb-2">2. Satiety Signaling</h3>
+                            <p class="text-sm text-sage-600 leading-relaxed">
+                                Gives GLP-1 and Leptin satiety hormones sufficient time to reach the hypothalamus before overconsumption occurs.
+                            </p>
+                        </div>
+                        <div class="bg-warmWhite p-6 rounded-2xl border border-sage-100 hover:shadow-lg transition-all group">
+                            <div class="w-12 h-12 bg-sage-100 text-sage-500 rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage-500 group-hover:text-white transition-colors">
+                                <i data-lucide="pie-chart" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-sage-700 mb-2">3. Natural Portion Control</h3>
+                            <p class="text-sm text-sage-600 leading-relaxed">
+                                When you chew 25-30 times per bite, meal duration lengthens naturally, causing you to leave 15-25% of food on the plate effortlessly.
+                            </p>
+                        </div>
+                        <div class="bg-warmWhite p-6 rounded-2xl border border-sage-100 hover:shadow-lg transition-all group">
+                            <div class="w-12 h-12 bg-sage-100 text-sage-500 rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage-500 group-hover:text-white transition-colors">
+                                <i data-lucide="repeat" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-sage-700 mb-2">4. Habit Rewiring</h3>
+                            <p class="text-sm text-sage-600 leading-relaxed">
+                                Break emotional and distracted eating patterns by creating a dedicated, mindful ritual around every meal.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Chewing Pace & Weight Loss Calculator -->
+            <section id="calculator-section" class="py-16 bg-warmWhite">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-sage-100">
+                        <div class="text-center max-w-xl mx-auto mb-8">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-coral-500 bg-coral-400/10 px-3 py-1 rounded-full">Interactive Tool</span>
+                            <h2 class="text-3xl font-bold text-sage-700 mt-2">Chewing Pace & Satiety Calculator</h2>
+                            <p class="text-sm text-sage-600 mt-1">Discover how simple adjustments to your bite count and meal duration can trim hundreds of weekly excess calories.</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-8 items-start">
+                            <!-- Calculator Inputs -->
+                            <form id="calculator-form" onsubmit="event.preventDefault(); calculateImpact();" class="space-y-5">
+                                <div>
+                                    <label class="block text-sm font-semibold text-sage-700 mb-1">Average Bite Count Per Bite</label>
+                                    <div class="flex items-center gap-4">
+                                        <input type="range" id="calc-bites" min="5" max="40" value="10" class="w-full accent-sage-500 h-2 bg-sage-100 rounded-lg cursor-pointer" oninput="document.getElementById('calc-bites-val').innerText = this.value + ' chews'">
+                                        <span id="calc-bites-val" class="text-sm font-bold text-sage-700 min-w-[70px]">10 chews</span>
+                                    </div>
+                                    <span class="text-[11px] text-sage-500">Average fast eater: 6-10 chews. Ideal target: 20-30 chews.</span>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-sage-700 mb-1">Current Average Meal Duration</label>
+                                    <select id="calc-duration" class="w-full px-4 py-2.5 rounded-xl border border-sage-200 focus:ring-2 focus:ring-sage-500 focus:outline-none text-sm bg-warmWhite">
+                                        <option value="7">Rapid (< 8 minutes)</option>
+                                        <option value="12" selected>Standard (10-15 minutes)</option>
+                                        <option value="20">Mindful (20+ minutes)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-sage-700 mb-1">Daily Meal Calorie Target (Estimated)</label>
+                                    <input type="number" id="calc-calories" value="2200" step="50" min="1200" max="4000" class="w-full px-4 py-2.5 rounded-xl border border-sage-200 focus:ring-2 focus:ring-sage-500 focus:outline-none text-sm bg-warmWhite">
+                                </div>
+
+                                <button type="submit" class="w-full bg-sage-500 hover:bg-sage-600 text-white font-semibold py-3 rounded-xl shadow transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i> Calculate Mindful Savings
+                                </button>
+                            </form>
+
+                            <!-- Calculator Dynamic Output -->
+                            <div class="bg-sage-50 p-6 rounded-2xl border border-sage-200/60 flex flex-col justify-between h-full space-y-4">
+                                <div>
+                                    <h4 class="text-xs font-bold text-sage-500 uppercase tracking-wider mb-3">Estimated Impact Profile</h4>
+                                    
+                                    <div class="space-y-4">
+                                        <div>
+                                            <div class="text-xs text-sage-600">Satiety Hormone Trigger Status</div>
+                                            <div id="res-satiety" class="text-base font-bold text-coral-500 flex items-center gap-1.5 mt-0.5">
+                                                <i data-lucide="alert-circle" class="w-4 h-4"></i> Premature / Delayed Release
+                                            </div>
+                                        </div>
+
+                                        <div class="border-t border-sage-200/60 pt-3">
+                                            <div class="text-xs text-sage-600">Estimated Calorie Reduction</div>
+                                            <div id="res-calories" class="text-2xl font-black text-sage-700 mt-0.5">
+                                                ~0 - 50 kcal / day
+                                            </div>
+                                            <p class="text-[11px] text-sage-500 mt-1">Based on reduction of overeating before full gastric stretch signaling.</p>
+                                        </div>
+
+                                        <div class="border-t border-sage-200/60 pt-3">
+                                            <div class="text-xs text-sage-600">Potential Annual Weight Shift</div>
+                                            <div id="res-weight" class="text-xl font-bold text-emeraldCustom mt-0.5">
+                                                ~2 - 4 lbs naturally
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white p-3.5 rounded-xl border border-sage-100 text-xs text-sage-600 flex items-start gap-2">
+                                    <i data-lucide="info" class="w-4 h-4 text-sage-500 flex-shrink-0 mt-0.5"></i>
+                                    <span><strong>Tip:</strong> Increasing chew count from 10 to 25 chews per bite naturally reduces total meal intake by up to ~12-15%.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== 2. ABOUT US & SCIENCE PAGE ==================== -->
+        <div id="page-about" class="page-view">
+            <section class="py-16 bg-warmWhite">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <!-- Heading -->
+                    <div class="text-center max-w-3xl mx-auto mb-16">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-sage-500 bg-sage-100 px-3 py-1 rounded-full">Our Philosophy</span>
+                        <h1 class="text-4xl font-extrabold text-sage-700 mt-3">The Science of Mindful Mastication</h1>
+                        <p class="text-lg text-sage-600 mt-3">ChewsToLose was founded on a simple biological truth: your body possesses an innate satiety signaling mechanism that modern fast-paced eating has overridden.</p>
+                    </div>
+
+                    <!-- Science Deep Dive Grid -->
+                    <div class="grid lg:grid-cols-2 gap-12 items-center mb-20">
+                        <div class="space-y-6">
+                            <h2 class="text-2xl font-bold text-sage-700"> Hormones: Leptin & Ghrelin</h2>
+                            <p class="text-sage-600 leading-relaxed">
+                                When food enters the stomach, two major chemical messengers dictate your hunger levels: <strong>Ghrelin</strong> (the hunger hormone) and <strong>Leptin</strong> (the satiety signal).
+                            </p>
+                            <p class="text-sage-600 leading-relaxed">
+                                When you swallow hastily without thorough chewing, food enters the stomach before the digestive track can stimulate CCK (Cholecystokinin) and PYY hormones. By extending your meal to at least 20 minutes with 25+ chews per bite, you allow these signals to reach the brain's hypothalamus, shutting off hunger cravings naturally.
+                            </p>
+                            <div class="grid sm:grid-cols-2 gap-4 pt-2">
+                                <div class="p-4 bg-white rounded-2xl border border-sage-100 shadow-sm">
+                                    <div class="font-bold text-sage-700 text-base mb-1">Ghrelin Reduction</div>
+                                    <div class="text-xs text-sage-500">Slower eating causes a faster drop in hunger hormones, preventing secondary snacking.</div>
+                                </div>
+                                <div class="p-4 bg-white rounded-2xl border border-sage-100 shadow-sm">
+                                    <div class="font-bold text-sage-700 text-base mb-1">Salivary Amylase</div>
+                                    <div class="text-xs text-sage-500">Chewing mixes food with enzymes, breaking down starches and eliminating digestive gas.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-3xl border border-sage-100 shadow-lg space-y-6">
+                            <h3 class="text-xl font-bold text-sage-700 border-b border-sage-100 pb-3">The Mastication Feedback Loop</h3>
+                            <div class="space-y-4">
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 rounded-full bg-sage-100 text-sage-700 font-bold flex items-center justify-center shrink-0">1</div>
+                                    <div>
+                                        <h4 class="font-semibold text-sage-700">Mechanical Breakdown</h4>
+                                        <p class="text-xs text-sage-600 mt-0.5">Increases surface area of food particles for gastric juice efficiency.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 rounded-full bg-sage-100 text-sage-700 font-bold flex items-center justify-center shrink-0">2</div>
+                                    <div>
+                                        <h4 class="font-semibold text-sage-700">Cephalic Phase Response</h4>
+                                        <p class="text-xs text-sage-600 mt-0.5">Extended oral contact signals pancreas to secrete insulin in preparation for nutrients.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 rounded-full bg-sage-100 text-sage-700 font-bold flex items-center justify-center shrink-0">3</div>
+                                    <div>
+                                        <h4 class="font-semibold text-sage-700">Vagus Nerve Activation</h4>
+                                        <p class="text-xs text-sage-600 mt-0.5">Stomach wall mechanoreceptors send full signals straight to the brain stem.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expert Team / Vision Section -->
+                    <div class="border-t border-sage-200/60 pt-16">
+                        <div class="text-center max-w-2xl mx-auto mb-12">
+                            <h2 class="text-3xl font-bold text-sage-700">Our Advisory Team</h2>
+                            <p class="text-sm text-sage-600 mt-1">Guided by gastroenterologists, behavioral psychologists, and clinical nutritionists.</p>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div class="bg-white p-6 rounded-2xl border border-sage-100 text-center space-y-3 shadow-sm">
+                                <div class="w-20 h-20 bg-sage-100 rounded-full mx-auto flex items-center justify-center text-sage-600 font-bold text-xl">
+                                    DR
+                                </div>
+                                <h3 class="font-bold text-sage-700 text-lg">Dr. Elena Rostova</h3>
+                                <p class="text-xs text-coral-500 font-semibold">Gastroenterology Specialist</p>
+                                <p class="text-xs text-sage-600">" Chewing thoroughly is the single most understated intervention for acid reflux and metabolic health."</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl border border-sage-100 text-center space-y-3 shadow-sm">
+                                <div class="w-20 h-20 bg-sage-100 rounded-full mx-auto flex items-center justify-center text-sage-600 font-bold text-xl">
+                                    MS
+                                </div>
+                                <h3 class="font-bold text-sage-700 text-lg">Marcus Sterling, MS</h3>
+                                <p class="text-xs text-coral-500 font-semibold">Behavioral Nutrition Director</p>
+                                <p class="text-xs text-sage-600">"We don't restrict foods; we rewire the neural pacing of how you consume meal macronutrients."</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl border border-sage-100 text-center space-y-3 shadow-sm">
+                                <div class="w-20 h-20 bg-sage-100 rounded-full mx-auto flex items-center justify-center text-sage-600 font-bold text-xl">
+                                    SK
+                                </div>
+                                <h3 class="font-bold text-sage-700 text-lg">Sarah Chen, RD</h3>
+                                <p class="text-xs text-coral-500 font-semibold">Lead Mindful Eating Coach</p>
+                                <p class="text-xs text-sage-600">"Helping thousands switch off emotional fast-eating habits with actionable timer protocols."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== 3. PROGRAMS & PRODUCTS PAGE ==================== -->
+        <div id="page-programs" class="page-view">
+            <section class="py-16 bg-warmWhite">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-3xl mx-auto mb-10">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-sage-500 bg-sage-100 px-3 py-1 rounded-full">Store & Coaching</span>
+                        <h1 class="text-4xl font-extrabold text-sage-700 mt-2">Programs & Health Products</h1>
+                        <p class="text-sage-600 mt-2">Guided challenges, starter kits, and digital portion tools tailored for your weight management journey.</p>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="flex justify-center mb-10">
+                        <div class="bg-white p-1.5 rounded-2xl border border-sage-200/80 shadow-sm flex gap-2">
+                            <button onclick="filterProducts('all')" id="tab-all" class="prod-tab-btn px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-sage-500 text-white">All Offerings</button>
+                            <button onclick="filterProducts('coaching')" id="tab-coaching" class="prod-tab-btn px-5 py-2.5 rounded-xl text-sm font-semibold transition-all text-sage-600 hover:bg-sage-50">Coaching & Challenges</button>
+                            <button onclick="filterProducts('physical')" id="tab-physical" class="prod-tab-btn px-5 py-2.5 rounded-xl text-sm font-semibold transition-all text-sage-600 hover:bg-sage-50">Kits & Physical Tools</button>
+                        </div>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="products-grid">
+                        <!-- Product Card 1 -->
+                        <div class="prod-card bg-white rounded-3xl border border-sage-100 overflow-hidden shadow-md hover:shadow-xl transition-all flex flex-col justify-between" data-category="coaching">
+                            <div>
+                                <div class="h-48 bg-sage-100 relative flex items-center justify-center p-6">
+                                    <span class="absolute top-4 right-4 bg-coral-500 text-white text-xs font-bold px-3 py-1 rounded-full">Popular</span>
+                                    <i data-lucide="calendar-check" class="w-20 h-20 text-sage-500/80"></i>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="text-xs font-semibold text-coral-500 uppercase">21-Day Challenge</div>
+                                    <h3 class="text-xl font-bold text-sage-700">21-Day Mindful Chewing Challenge</h3>
+                                    <p class="text-sm text-sage-600">Daily audio bite guides, habit-tracker printables, and weekly live group Q&A sessions.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0 border-t border-sage-50 mt-4 flex items-center justify-between">
+                                <span class="text-2xl font-black text-sage-700">$29</span>
+                                <button onclick="triggerToast('Added 21-Day Challenge to cart!')" class="bg-sage-500 hover:bg-sage-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Join Challenge
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Card 2 -->
+                        <div class="prod-card bg-white rounded-3xl border border-sage-100 overflow-hidden shadow-md hover:shadow-xl transition-all flex flex-col justify-between" data-category="physical">
+                            <div>
+                                <div class="h-48 bg-cream relative flex items-center justify-center p-6">
+                                    <i data-lucide="droplet" class="w-20 h-20 text-sage-500/80"></i>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="text-xs font-semibold text-sage-500 uppercase">Starter Physical Kit</div>
+                                    <h3 class="text-xl font-bold text-sage-700">Hydration & Mastication Starter Kit</h3>
+                                    <p class="text-sm text-sage-600">Includes haptic chew-timer wristband, 32oz marked time water bottle, and portion control divider plate.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0 border-t border-sage-50 mt-4 flex items-center justify-between">
+                                <span class="text-2xl font-black text-sage-700">$49</span>
+                                <button onclick="triggerToast('Added Starter Kit to cart!')" class="bg-sage-500 hover:bg-sage-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Order Kit
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Card 3 -->
+                        <div class="prod-card bg-white rounded-3xl border border-sage-100 overflow-hidden shadow-md hover:shadow-xl transition-all flex flex-col justify-between" data-category="coaching">
+                            <div>
+                                <div class="h-48 bg-sage-50 relative flex items-center justify-center p-6">
+                                    <i data-lucide="compass" class="w-20 h-20 text-sage-500/80"></i>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="text-xs font-semibold text-coral-500 uppercase">Digital Guide</div>
+                                    <h3 class="text-xl font-bold text-sage-700">Smart Meal Portions & Tempo Guide</h3>
+                                    <p class="text-sm text-sage-600">Comprehensive PDF & app guide detailing optimal bite counts for proteins, complex carbs, and fiber.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0 border-t border-sage-50 mt-4 flex items-center justify-between">
+                                <span class="text-2xl font-black text-sage-700">$15</span>
+                                <button onclick="triggerToast('Added Smart Meal Guide to cart!')" class="bg-sage-500 hover:bg-sage-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Get Digital Copy
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Card 4 -->
+                        <div class="prod-card bg-white rounded-3xl border border-sage-100 overflow-hidden shadow-md hover:shadow-xl transition-all flex flex-col justify-between" data-category="physical">
+                            <div>
+                                <div class="h-48 bg-sage-100/60 relative flex items-center justify-center p-6">
+                                    <i data-lucide="utensils-crossed" class="w-20 h-20 text-sage-500/80"></i>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="text-xs font-semibold text-sage-500 uppercase">Hardware Tool</div>
+                                    <h3 class="text-xl font-bold text-sage-700">ChewsToLose Smart Cutlery Set</h3>
+                                    <p class="text-sm text-sage-600">Weighted ergonomic fork & spoon engineered to encourage resting cutlery between bites.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0 border-t border-sage-50 mt-4 flex items-center justify-between">
+                                <span class="text-2xl font-black text-sage-700">$34</span>
+                                <button onclick="triggerToast('Added Cutlery Set to cart!')" class="bg-sage-500 hover:bg-sage-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Order Cutlery
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Card 5 -->
+                        <div class="prod-card bg-white rounded-3xl border border-sage-100 overflow-hidden shadow-md hover:shadow-xl transition-all flex flex-col justify-between" data-category="coaching">
+                            <div>
+                                <div class="h-48 bg-coral-400/10 relative flex items-center justify-center p-6">
+                                    <i data-lucide="user-check" class="w-20 h-20 text-coral-500/80"></i>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="text-xs font-semibold text-coral-500 uppercase">1-on-1 Coaching</div>
+                                    <h3 class="text-xl font-bold text-sage-700">1-Month Mindful Weight Masterclass</h3>
+                                    <p class="text-sm text-sage-600">Personalized consultations with certified dietitians to tune your mastication habits and meal timing.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0 border-t border-sage-50 mt-4 flex items-center justify-between">
+                                <span class="text-2xl font-black text-sage-700">$149</span>
+                                <button onclick="triggerToast('Coaching inquiry submitted!')" class="bg-sage-500 hover:bg-sage-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i> Book Consultation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== 4. MINDFUL EATING TIMER & TRACKER ==================== -->
+        <div id="page-timer" class="page-view">
+            <section class="py-12 bg-warmWhite">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                    
+                    <!-- Header -->
+                    <div class="text-center max-w-2xl mx-auto">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-coral-500 bg-coral-400/10 px-3 py-1 rounded-full">Interactive Companion</span>
+                        <h1 class="text-4xl font-extrabold text-sage-700 mt-2">Bite Pace Timer & Meal Logger</h1>
+                        <p class="text-sm text-sage-600 mt-2">Use this tool during your meal to pace your bites, count chews, and record consistent mindful eating logs.</p>
+                    </div>
+
+                    <div class="grid lg:grid-cols-12 gap-8 items-start">
+                        
+                        <!-- Interactive Timer Unit (8 Columns) -->
+                        <div class="lg:col-span-7 bg-white p-6 sm:p-10 rounded-3xl border border-sage-100 shadow-xl space-y-8">
+                            
+                            <!-- Mode Selection -->
+                            <div class="flex justify-between items-center bg-sage-50 p-2 rounded-2xl border border-sage-100">
+                                <button onclick="setTimerMode(20)" id="mode-20" class="mode-btn flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-sage-500 text-white shadow-sm">
+                                    20-Min Meal Protocol
+                                </button>
+                                <button onclick="setTimerMode(15)" id="mode-15" class="mode-btn flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-sage-600 hover:bg-sage-100">
+                                    15-Min Quick Meal
+                                </button>
+                                <button onclick="setTimerMode(30)" id="mode-30" class="mode-btn flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-sage-600 hover:bg-sage-100">
+                                    30-Min Feast
+                                </button>
+                            </div>
+
+                            <!-- Visual Pace Circle -->
+                            <div class="relative flex flex-col items-center justify-center my-4">
+                                <div id="timer-outer-ring" class="w-64 h-64 sm:w-72 sm:h-72 rounded-full border-8 border-sage-100 flex flex-col items-center justify-center relative transition-all bg-gradient-to-b from-warmWhite to-white shadow-inner">
+                                    <!-- Animated pulse indicator -->
+                                    <div id="pace-pulse-bg" class="absolute inset-0 rounded-full bg-sage-500/10 hidden animate-pulse-ring"></div>
+                                    
+                                    <div class="text-xs uppercase tracking-widest font-bold text-sage-500 mb-1" id="timer-status-label">Ready to Eat</div>
+                                    <div class="text-5xl font-black text-sage-700 font-mono tracking-tight" id="timer-display">20:00</div>
+                                    
+                                    <!-- Bite Chews Sub Counter -->
+                                    <div class="mt-3 px-4 py-1.5 rounded-full bg-sage-100 border border-sage-200 text-sage-700 text-xs font-semibold flex items-center gap-1.5">
+                                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-coral-500"></i>
+                                        <span id="bite-prompt">Target: 25 Chews / Bite</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bite Rhythm Visualizer Bar -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs font-semibold text-sage-600">
+                                    <span>Current Bite Rhythm Phase</span>
+                                    <span id="bite-phase-text" class="text-coral-500">Idle</span>
+                                </div>
+                                <div class="w-full bg-sage-100 h-3 rounded-full overflow-hidden">
+                                    <div id="bite-progress-bar" class="bg-coral-500 h-full w-0 transition-all duration-300"></div>
+                                </div>
+                            </div>
+
+                            <!-- Controls -->
+                            <div class="flex flex-wrap gap-4 justify-center items-center">
+                                <button id="btn-start" onclick="toggleTimer()" class="flex-1 sm:flex-none bg-coral-500 hover:bg-coral-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-base">
+                                    <i data-lucide="play" class="w-5 h-5 fill-current"></i> Start Meal
+                                </button>
+                                <button onclick="resetTimer()" class="bg-sage-100 hover:bg-sage-200 text-sage-700 font-semibold px-5 py-3.5 rounded-xl transition-colors flex items-center gap-1.5 text-sm">
+                                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+                                </button>
+                                <button onclick="logBiteCount()" class="bg-sage-500 hover:bg-sage-600 text-white font-semibold px-5 py-3.5 rounded-xl transition-colors flex items-center gap-1.5 text-sm shadow">
+                                    <i data-lucide="plus" class="w-4 h-4"></i> Record Bite (<span id="total-bites-count">0</span>)
+                                </button>
+                            </div>
+
+                            <!-- Sound toggle simulation -->
+                            <div class="pt-2 border-t border-sage-100 flex items-center justify-between text-xs text-sage-600">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="sound-toggle" checked class="accent-sage-500 rounded">
+                                    <span>Audio Chime Feedback on Bite Rhythm</span>
+                                </label>
+                                <span class="text-sage-500">Pace: 30s per bite cycle</span>
+                            </div>
+                        </div>
+
+                        <!-- Meal Tracker Logger (5 Columns) -->
+                        <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-sage-100 shadow-xl space-y-6">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-sage-700 flex items-center gap-2">
+                                    <i data-lucide="clipboard-list" class="w-5 h-5 text-sage-500"></i>
+                                    Daily Meal Log
+                                </h3>
+                                <span class="text-xs bg-sage-100 text-sage-700 font-semibold px-2.5 py-1 rounded-full" id="log-count">0 Meals Today</span>
+                            </div>
+
+                            <!-- Quick Log Form -->
+                            <form id="meal-log-form" onsubmit="event.preventDefault(); saveMealLog();" class="space-y-3 bg-warmWhite p-4 rounded-2xl border border-sage-100">
+                                <div>
+                                    <label class="block text-xs font-semibold text-sage-700 mb-1">Meal Title</label>
+                                    <input type="text" id="log-title" placeholder="e.g. Salmon & Avocado Salad" required class="w-full px-3 py-2 rounded-xl border border-sage-200 text-xs focus:ring-2 focus:ring-sage-500 focus:outline-none bg-white">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-sage-700 mb-1">Duration (Min)</label>
+                                        <input type="number" id="log-duration" value="20" min="1" max="120" class="w-full px-3 py-2 rounded-xl border border-sage-200 text-xs focus:ring-2 focus:ring-sage-500 focus:outline-none bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-sage-700 mb-1">Total Bites</label>
+                                        <input type="number" id="log-bites" value="25" min="1" max="200" class="w-full px-3 py-2 rounded-xl border border-sage-200 text-xs focus:ring-2 focus:ring-sage-500 focus:outline-none bg-white">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-sage-700 mb-1">Fullness Score After Meal</label>
+                                    <select id="log-fullness" class="w-full px-3 py-2 rounded-xl border border-sage-200 text-xs focus:ring-2 focus:ring-sage-500 focus:outline-none bg-white">
+                                        <option value="Perfectly Satisfied (80%)">Perfectly Satisfied (80%)</option>
+                                        <option value="Slightly Hungry">Slightly Hungry</option>
+                                        <option value="Overly Full">Overly Full</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full bg-sage-500 hover:bg-sage-600 text-white font-medium text-xs py-2.5 rounded-xl transition-all shadow">
+                                    Save Entry to History
+                                </button>
+                            </form>
+
+                            <!-- Saved Entries List -->
+                            <div class="space-y-3">
+                                <h4 class="text-xs font-bold text-sage-500 uppercase tracking-wider">Logged History</h4>
+                                <div id="logged-meals-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                                    <p class="text-xs text-sage-500 italic text-center py-4">No meal entries logged yet today. Use the timer or form above to record your first meal!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== 5. BLOG & TIPS PAGE ==================== -->
+        <div id="page-blog" class="page-view">
+            <section class="py-16 bg-warmWhite">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <!-- Heading -->
+                    <div class="text-center max-w-3xl mx-auto mb-12">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-sage-500 bg-sage-100 px-3 py-1 rounded-full">Articles & Knowledge</span>
+                        <h1 class="text-4xl font-extrabold text-sage-700 mt-2">Mindful Eating Insights</h1>
+                        <p class="text-sage-600 mt-2">Evidence-based strategies to slow down, optimize digestion, and achieve natural calorie management.</p>
+                    </div>
+
+                    <!-- Search & Filter Controls -->
+                    <div class="max-w-2xl mx-auto mb-12 flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-3 text-sage-400"></i>
+                            <input type="text" id="blog-search-input" onkeyup="filterBlogArticles()" placeholder="Search articles by key phrase or title..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-sage-200 text-sm focus:ring-2 focus:ring-sage-500 focus:outline-none bg-white">
+                        </div>
+                        <select id="blog-category-select" onchange="filterBlogArticles()" class="px-4 py-2.5 rounded-xl border border-sage-200 text-sm focus:ring-2 focus:ring-sage-500 focus:outline-none bg-white font-medium text-sage-700">
+                            <option value="all">All Categories</option>
+                            <option value="nutrition">Nutrition & Digestion</option>
+                            <option value="habits">Behavioral Habits</option>
+                            <option value="weightloss">Weight Loss Science</option>
+                        </select>
+                    </div>
+
+                    <!-- Blog Articles Grid -->
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="blog-grid">
+                        
+                        <!-- Article 1 -->
+                        <article class="blog-card bg-white rounded-3xl border border-sage-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between" data-category="nutrition" data-title="the 20 chew rule digestion bloat gut health">
+                            <div>
+                                <div class="h-44 bg-sage-100 flex items-center justify-center text-sage-500 font-bold p-6">
+                                    <i data-lucide="heart" class="w-16 h-16 opacity-60"></i>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="flex items-center justify-between text-xs text-sage-500 font-medium">
+                                        <span>Nutrition & Digestion</span>
+                                        <span>5 min read</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-sage-700 hover:text-coral-500 transition-colors cursor-pointer">Why Chewing 20+ Times Cures Post-Meal Bloating</h3>
+                                    <p class="text-sm text-sage-600">Discover how salivary amylase enzymatic activity reduces strain on the lower esophagus and stomach acids.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0">
+                                <button onclick="triggerToast('Opening full article reader...')" class="text-xs font-bold text-coral-500 hover:text-coral-600 flex items-center gap-1">
+                                    Read Article <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </article>
+
+                        <!-- Article 2 -->
+                        <article class="blog-card bg-white rounded-3xl border border-sage-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between" data-category="weightloss" data-title="leptin ghrelin brain full signal mindful eating calories">
+                            <div>
+                                <div class="h-44 bg-cream flex items-center justify-center text-sage-500 font-bold p-6">
+                                    <i data-lucide="activity" class="w-16 h-16 opacity-60"></i>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="flex items-center justify-between text-xs text-sage-500 font-medium">
+                                        <span>Weight Loss Science</span>
+                                        <span>7 min read</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-sage-700 hover:text-coral-500 transition-colors cursor-pointer">The Leptin Delay: Why Fast Eaters Overeat by 300 Calories</h3>
+                                    <p class="text-sm text-sage-600">How rapid swallowing bypasses satiety hormones, causing you to eat long after your body is full.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0">
+                                <button onclick="triggerToast('Opening full article reader...')" class="text-xs font-bold text-coral-500 hover:text-coral-600 flex items-center gap-1">
+                                    Read Article <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </article>
+
+                        <!-- Article 3 -->
+                        <article class="blog-card bg-white rounded-3xl border border-sage-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between" data-category="habits" data-title="distracted eating screen time TV smartphone habit">
+                            <div>
+                                <div class="h-44 bg-sage-50 flex items-center justify-center text-sage-500 font-bold p-6">
+                                    <i data-lucide="tv" class="w-16 h-16 opacity-60"></i>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="flex items-center justify-between text-xs text-sage-500 font-medium">
+                                        <span>Behavioral Habits</span>
+                                        <span>4 min read</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-sage-700 hover:text-coral-500 transition-colors cursor-pointer">Screen-Free Dining: Breaking the Distracted Eating Habit</h3>
+                                    <p class="text-sm text-sage-600">Simple environmental tweaks to keep your focus on food texture, flavor, and bite rhythm.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0">
+                                <button onclick="triggerToast('Opening full article reader...')" class="text-xs font-bold text-coral-500 hover:text-coral-600 flex items-center gap-1">
+                                    Read Article <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </article>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== 6. CONTACT & COMMUNITY PAGE ==================== -->
+        <div id="page-contact" class="page-view">
+            <section class="py-16 bg-warmWhite">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+                    
+                    <!-- Heading -->
+                    <div class="text-center max-w-3xl mx-auto">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-sage-500 bg-sage-100 px-3 py-1 rounded-full">Connect & Inspire</span>
+                        <h1 class="text-4xl font-extrabold text-sage-700 mt-2">Community & Contact</h1>
+                        <p class="text-sage-600 mt-2">Hear success stories from our mindful community, subscribe for weekly tips, or reach our expert coaches.</p>
+                    </div>
+
+                    <!-- Community Testimonials Grid -->
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-bold text-sage-700 text-center">Community Member Successes</h2>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div class="bg-white p-6 rounded-3xl border border-sage-100 shadow-sm space-y-4">
+                                <div class="flex text-coral-500">
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                </div>
+                                <p class="text-sm text-sage-600 italic">"I never realized I was swallowing meals in under 6 minutes. Using the Bite Pace Timer helped me lose 14 lbs in 2 months without changing what I cooked."</p>
+                                <div class="text-xs font-bold text-sage-700">— Amanda K., Austin, TX</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl border border-sage-100 shadow-sm space-y-4">
+                                <div class="flex text-coral-500">
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                </div>
+                                <p class="text-sm text-sage-600 italic">"My chronic indigestion completely vanished after following the 20-chews-per-bite protocol during the 21-Day Challenge. Game changer!"</p>
+                                <div class="text-xs font-bold text-sage-700">— David L., Chicago, IL</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl border border-sage-100 shadow-sm space-y-4">
+                                <div class="flex text-coral-500">
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                </div>
+                                <p class="text-sm text-sage-600 italic">"The meal log tracker keeps me accountable. It's fascinating to see how fullness directly correlates with meal duration."</p>
+                                <div class="text-xs font-bold text-sage-700">— Priyah M., Seattle, WA</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact & Newsletter Form Grid -->
+                    <div class="grid lg:grid-cols-2 gap-12 items-start pt-8 border-t border-sage-200/60">
+                        
+                        <!-- Contact Form -->
+                        <div class="bg-white p-8 rounded-3xl border border-sage-100 shadow-md space-y-6">
+                            <div>
+                                <h3 class="text-xl font-bold text-sage-700">Get in Touch with Our Team</h3>
+                                <p class="text-xs text-sage-500 mt-1">Have questions regarding our coaching programs or chew pacing tools? Send us a message.</p>
+                            </div>
+
+                            <form id="contact-form" onsubmit="event.preventDefault(); handleContactSubmit();" class="space-y-4">
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-sage-700 mb-1">Your Name</label>
+                                        <input type="text" required placeholder="John Doe" class="w-full px-4 py-2.5 rounded-xl border border-sage-200 text-sm focus:ring-2 focus:ring-sage-500 focus:outline-none bg-warmWhite">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-sage-700 mb-1">Email Address</label>
+                                        <input type="email" required placeholder="john@example.com" class="w-full px-4 py-2.5 rounded-xl border border-sage-200 text-sm focus:ring-2 focus:ring-sage-500 focus:outline-none bg-warmWhite">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-sage-700 mb-1">Subject</label>
+                                    <select class="w-full px-4 py-2.5 rounded-xl border border-sage-200 text-sm focus:ring-2 focus:ring-sage-500 focus:outline-none bg-warmWhite">
+                                        <option>Program / Course Inquiry</option>
+                                        <option>Product Support</option>
+                                        <option>General Feedback</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-sage-700 mb-1">Message</label>
+                                    <textarea rows="4" required placeholder="How can we help your mindful journey?" class="w-full px-4 py-2.5 rounded-xl border border-sage-200 text-sm focus:ring-2 focus:ring-sage-500 focus:outline-none bg-warmWhite"></textarea>
+                                </div>
+                                <button type="submit" class="w-full bg-sage-500 hover:bg-sage-600 text-white font-semibold py-3 rounded-xl transition-all shadow">
+                                    Send Message
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Newsletter & Direct Support -->
+                        <div class="space-y-8">
+                            <div class="bg-sage-600 text-white p-8 rounded-3xl shadow-lg space-y-4">
+                                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-coral-400">
+                                    <i data-lucide="mail" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold">Join the Mindful Eating Digest</h3>
+                                <p class="text-sm text-sage-100 leading-relaxed">
+                                    Get weekly bite pacing reminders, gut health studies, and exclusive community discounts delivered straight to your inbox.
+                                </p>
+                                <form onsubmit="event.preventDefault(); triggerToast('Subscribed to ChewsToLose Newsletter!'); this.reset();" class="flex gap-2 pt-2">
+                                    <input type="email" required placeholder="Enter your email" class="flex-1 px-4 py-3 rounded-xl border-none text-sm text-sage-800 focus:outline-none bg-white">
+                                    <button type="submit" class="bg-coral-500 hover:bg-coral-600 text-white font-bold px-5 py-3 rounded-xl text-sm transition-colors shadow">
+                                        Subscribe
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-3xl border border-sage-100 space-y-3 text-sm text-sage-600">
+                                <div class="font-bold text-sage-700 text-base">Direct Customer Support</div>
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="mail" class="w-4 h-4 text-sage-500"></i> support@chewstolose.com
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="clock" class="w-4 h-4 text-sage-500"></i> Mon - Fri: 9am - 5pm EST
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-sage-800 text-sage-100 py-12 border-t border-sage-700 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-sage-500 flex items-center justify-center text-white font-bold text-xs">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-lg font-bold text-white">ChewsToLose<span class="text-coral-500">.com</span></span>
+                    </div>
+                    <p class="text-xs text-sage-200 leading-relaxed">
+                        Pioneering mindful mastication for effortless calorie awareness and metabolic wellness.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wider">Quick Links</h4>
+                    <ul class="space-y-2 text-xs text-sage-200">
+                        <li><a href="#home" onclick="navigateTo('home')" class="hover:text-coral-400 transition-colors">Home Page</a></li>
+                        <li><a href="#timer" onclick="navigateTo('timer')" class="hover:text-coral-400 transition-colors">Bite Pace Timer</a></li>
+                        <li><a href="#programs" onclick="navigateTo('programs')" class="hover:text-coral-400 transition-colors">Programs & Store</a></li>
+                        <li><a href="#about" onclick="navigateTo('about')" class="hover:text-coral-400 transition-colors">Science & Satiety</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wider">Interactive Tools</h4>
+                    <ul class="space-y-2 text-xs text-sage-200">
+                        <li><a href="#calculator" onclick="navigateTo('home'); setTimeout(() => scrollToElement('calculator-section'), 100);" class="hover:text-coral-400 transition-colors">Satiety Calculator</a></li>
+                        <li><a href="#timer" onclick="navigateTo('timer')" class="hover:text-coral-400 transition-colors">Daily Meal Logger</a></li>
+                        <li><a href="#blog" onclick="navigateTo('blog')" class="hover:text-coral-400 transition-colors">Digestive Articles</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wider">Legal & Health Disclaimer</h4>
+                    <p class="text-[11px] text-sage-300 leading-relaxed">
+                        Statements on chewstolose.com have not been evaluated by the FDA. Our tools are meant for behavioral eating habit coaching and are not intended to diagnose or treat medical eating disorders.
+                    </p>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-sage-700/80 flex flex-col sm:flex-row justify-between items-center text-xs text-sage-300 gap-4">
+                <div>&copy; 2026 ChewsToLose.com. All rights reserved.</div>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="hover:text-white transition-colors">Medical Disclaimer</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Single Page App Router Logic
+        function navigateTo(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-view');
+            pages.forEach(p => p.classList.remove('active'));
+
+            // Show selected page
+            const target = document.getElementById('page-' + pageId);
+            if (target) {
+                target.classList.add('active');
+            }
+
+            // Update Nav Active States
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => {
+                btn.classList.remove('text-sage-700', 'bg-sage-100', 'font-bold');
+                btn.classList.add('text-sage-500');
+            });
+
+            const activeBtn = document.getElementById('nav-' + pageId);
+            if (activeBtn) {
+                activeBtn.classList.add('text-sage-700', 'bg-sage-100', 'font-bold');
+                activeBtn.classList.remove('text-sage-500');
+            }
+
+            // Scroll top on page switch
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Toggle Mobile Menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const openIcon = document.getElementById('menu-icon-open');
+            const closeIcon = document.getElementById('menu-icon-close');
+            
+            menu.classList.toggle('hidden');
+            openIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        }
+
+        // Helper scroll function
+        function scrollToElement(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Toast Notification System
+        function triggerToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-sage-700 text-white px-4 py-3 rounded-xl shadow-xl border border-sage-500 text-xs font-medium flex items-center gap-2 transition-all transform translate-y-2 opacity-0 pointer-events-auto';
+            toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emeraldCustom"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        /* ==================== CALCULATOR LOGIC ==================== */
+        function calculateImpact() {
+            const biteCount = parseInt(document.getElementById('calc-bites').value);
+            const duration = parseInt(document.getElementById('calc-duration').value);
+            const calories = parseInt(document.getElementById('calc-calories').value);
+
+            let satietyStatus = "Sub-optimal / FastSwallow";
+            let satietyColor = "text-coral-500";
+            let calReduction = 0;
+
+            if (biteCount >= 20 && duration >= 20) {
+                satietyStatus = "Optimal Satiety Signal Active (Leptin High)";
+                satietyColor = "text-emeraldCustom";
+                calReduction = Math.round(calories * 0.15); // ~15% reduction
+            } else if (biteCount >= 15 || duration >= 12) {
+                satietyStatus = "Moderate Satiety Signal";
+                satietyColor = "text-sage-600";
+                calReduction = Math.round(calories * 0.08); // ~8% reduction
+            } else {
+                satietyStatus = "Low Satiety - High Overeating Risk";
+                satietyColor = "text-coral-500";
+                calReduction = 20;
+            }
+
+            const annualWeightPounds = Math.round((calReduction * 365) / 3500);
+
+            document.getElementById('res-satiety').innerText = satietyStatus;
+            document.getElementById('res-satiety').className = `text-base font-bold flex items-center gap-1.5 mt-0.5 ${satietyColor}`;
+            document.getElementById('res-calories').innerText = `~${calReduction} kcal / day`;
+            document.getElementById('res-weight').innerText = `~${annualWeightPounds} lbs / year naturally`;
+
+            triggerToast('Recalculated pace impact metrics!');
+        }
+
+        /* ==================== BITE PACE TIMER LOGIC ==================== */
+        let timerInterval = null;
+        let biteCycleInterval = null;
+        let totalTimeSeconds = 20 * 60;
+        let currentTimeSeconds = 20 * 60;
+        let isRunning = false;
+        let recordedBites = 0;
+        let bitePhaseProgress = 0; // 0 to 100%
+
+        // Web Audio API Synth for sound feedback
+        function playChimeSound() {
+            if (!document.getElementById('sound-toggle').checked) return;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 note
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch(e) {
+                // Audio context restriction guard
+            }
+        }
+
+        function setTimerMode(minutes) {
+            if (isRunning) toggleTimer();
+            totalTimeSeconds = minutes * 60;
+            currentTimeSeconds = totalTimeSeconds;
+            
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('bg-sage-500', 'text-white', 'shadow-sm');
+                btn.classList.add('text-sage-600');
+            });
+            
+            const selectedBtn = document.getElementById('mode-' + minutes);
+            if (selectedBtn) {
+                selectedBtn.classList.add('bg-sage-500', 'text-white', 'shadow-sm');
+                selectedBtn.classList.remove('text-sage-600');
+            }
+
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(currentTimeSeconds / 60);
+            const secs = currentTimeSeconds % 60;
+            document.getElementById('timer-display').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('btn-start');
+            const pulseBg = document.getElementById('pace-pulse-bg');
+
+            if (!isRunning) {
+                // Start
+                isRunning = true;
+                btn.innerHTML = `<i data-lucide="pause" class="w-5 h-5 fill-current"></i> Pause Meal`;
+                btn.classList.replace('bg-coral-500', 'bg-sage-600');
+                btn.classList.replace('hover:bg-coral-600', 'hover:bg-sage-700');
+                pulseBg.classList.remove('hidden');
+                document.getElementById('timer-status-label').innerText = 'Chew Mindfully';
+
+                timerInterval = setInterval(() => {
+                    if (currentTimeSeconds > 0) {
+                        currentTimeSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        toggleTimer();
+                        triggerToast('Meal Duration Completed! Great job pacing.');
+                    }
+                }, 1000);
+
+                // Bite Cycle Visualizer (30 second cycle per bite prompt)
+                bitePhaseProgress = 0;
+                biteCycleInterval = setInterval(() => {
+                    bitePhaseProgress += 3.33; // ~30 seconds total cycle
+                    if (bitePhaseProgress > 100) {
+                        bitePhaseProgress = 0;
+                        recordedBites++;
+                        document.getElementById('total-bites-count').innerText = recordedBites;
+                        playChimeSound();
+                        triggerToast('Bite rhythm cycle completed. Take your next chew!');
+                    }
+
+                    document.getElementById('bite-progress-bar').style.width = bitePhaseProgress + '%';
+
+                    if (bitePhaseProgress < 30) {
+                        document.getElementById('bite-phase-text').innerText = 'Chewing Phase (20-30x)';
+                    } else if (bitePhaseProgress < 70) {
+                        document.getElementById('bite-phase-text').innerText = 'Swallow & Rest Cutlery';
+                    } else {
+                        document.getElementById('bite-phase-text').innerText = 'Prepare Next Bite';
+                    }
+                }, 1000);
+
+            } else {
+                // Pause
+                isRunning = false;
+                btn.innerHTML = `<i data-lucide="play" class="w-5 h-5 fill-current"></i> Resume`;
+                btn.classList.replace('bg-sage-600', 'bg-coral-500');
+                btn.classList.replace('hover:bg-sage-700', 'hover:bg-coral-600');
+                pulseBg.classList.add('hidden');
+                document.getElementById('timer-status-label').innerText = 'Paused';
+
+                clearInterval(timerInterval);
+                clearInterval(biteCycleInterval);
+            }
+            lucide.createIcons();
+        }
+
+        function resetTimer() {
+            if (isRunning) toggleTimer();
+            currentTimeSeconds = totalTimeSeconds;
+            recordedBites = 0;
+            bitePhaseProgress = 0;
+            document.getElementById('total-bites-count').innerText = '0';
+            document.getElementById('bite-progress-bar').style.width = '0%';
+            document.getElementById('bite-phase-text').innerText = 'Idle';
+            document.getElementById('timer-status-label').innerText = 'Ready to Eat';
+            updateTimerDisplay();
+        }
+
+        function logBiteCount() {
+            recordedBites++;
+            document.getElementById('total-bites-count').innerText = recordedBites;
+            document.getElementById('log-bites').value = recordedBites;
+            triggerToast(`Bite recorded! Total: ${recordedBites}`);
+        }
+
+        /* ==================== MEAL LOGGING SYSTEM ==================== */
+        let mealLogs = [];
+
+        function loadMealLogs() {
+            try {
+                const saved = localStorage.getItem('chewstolose_logs');
+                if (saved) mealLogs = JSON.parse(saved);
+            } catch(e) { mealLogs = []; }
+            renderMealLogs();
+        }
+
+        function saveMealLog() {
+            const title = document.getElementById('log-title').value;
+            const duration = document.getElementById('log-duration').value;
+            const bites = document.getElementById('log-bites').value;
+            const fullness = document.getElementById('log-fullness').value;
+
+            const entry = {
+                id: Date.now(),
+                title,
+                duration,
+                bites,
+                fullness,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            mealLogs.unshift(entry);
+            try {
+                localStorage.setItem('chewstolose_logs', JSON.stringify(mealLogs));
+            } catch(e){}
+
+            renderMealLogs();
+            document.getElementById('meal-log-form').reset();
+            triggerToast('Meal entry saved to history!');
+        }
+
+        function deleteLog(id) {
+            mealLogs = mealLogs.filter(item => item.id !== id);
+            try {
+                localStorage.setItem('chewstolose_logs', JSON.stringify(mealLogs));
+            } catch(e){}
+            renderMealLogs();
+            triggerToast('Log entry removed.');
+        }
+
+        function renderMealLogs() {
+            const listEl = document.getElementById('logged-meals-list');
+            const countEl = document.getElementById('log-count');
+
+            countEl.innerText = `${mealLogs.length} Meals Recorded`;
+
+            if (mealLogs.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-sage-500 italic text-center py-4">No meal entries logged yet today. Use the timer or form above to record your first meal!</p>`;
+                return;
+            }
+
+            listEl.innerHTML = mealLogs.map(log => `
+                <div class="bg-warmWhite p-3 rounded-xl border border-sage-100 flex items-center justify-between text-xs">
+                    <div class="space-y-0.5">
+                        <div class="font-bold text-sage-700 flex items-center gap-1.5">
+                            ${log.title}
+                            <span class="text-[10px] font-normal text-sage-500">(${log.time})</span>
+                        </div>
+                        <div class="text-[11px] text-sage-600">
+                            ⏱️ ${log.duration} min | 🦷 ${log.bites} bites | 😊 ${log.fullness}
+                        </div>
+                    </div>
+                    <button onclick="deleteLog(${log.id})" class="text-coral-500 hover:text-coral-600 p-1">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        /* ==================== PRODUCTS FILTERING ==================== */
+        function filterProducts(cat) {
+            const cards = document.querySelectorAll('.prod-card');
+            const tabs = document.querySelectorAll('.prod-tab-btn');
+
+            tabs.forEach(t => {
+                t.classList.remove('bg-sage-500', 'text-white');
+                t.classList.add('text-sage-600');
+            });
+
+            const activeTab = document.getElementById('tab-' + cat);
+            if (activeTab) {
+                activeTab.classList.add('bg-sage-500', 'text-white');
+                activeTab.classList.remove('text-sage-600');
+            }
+
+            cards.forEach(card => {
+                if (cat === 'all' || card.dataset.category === cat) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        /* ==================== BLOG SEARCH & FILTER ==================== */
+        function filterBlogArticles() {
+            const searchVal = document.getElementById('blog-search-input').value.toLowerCase();
+            const catVal = document.getElementById('blog-category-select').value;
+            const articles = document.querySelectorAll('.blog-card');
+
+            articles.forEach(art => {
+                const title = art.dataset.title.toLowerCase();
+                const category = art.dataset.category;
+
+                const matchesSearch = title.includes(searchVal);
+                const matchesCat = (catVal === 'all' || category === catVal);
+
+                if (matchesSearch && matchesCat) {
+                    art.style.display = 'flex';
+                } else {
+                    art.style.display = 'none';
+                }
+            });
+        }
+
+        /* ==================== CONTACT FORM ==================== */
+        function handleContactSubmit() {
+            document.getElementById('contact-form').reset();
+            triggerToast('Thank you! Your message has been sent to our coaches.');
+        }
+
+        // Initialize Page Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMealLogs();
+            updateTimerDisplay();
+            
+            // Hash Navigation Handler
+            const hash = window.location.hash.replace('#', '');
+            if (['home', 'timer', 'programs', 'about', 'blog', 'contact'].includes(hash)) {
+                navigateTo(hash);
+            } else {
+                navigateTo('home');
+            }
+        });
+    </script>
+</body>
+</html>
